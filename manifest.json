@@ -1,12 +1,24 @@
 {
   "manifest_version": 3,
-  "name": "Brightspace Transcript Exporter",
-  "version": "0.1.1",
+  "name": "McGill Transcript Exporter",
+  "version": "0.1.4",
   "description": "Export available video captions from Brightspace pages as Markdown, text, or WebVTT.",
   "permissions": ["activeTab", "downloads", "scripting"],
   "host_permissions": ["https://lrs.mcgill.ca/*"],
   "action": {
     "default_title": "Export video transcript",
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "assets/icons/martlet-16.png",
+      "32": "assets/icons/martlet-32.png",
+      "48": "assets/icons/martlet-48.png",
+      "128": "assets/icons/martlet-128.png"
+    }
+  },
+  "icons": {
+    "16": "assets/icons/martlet-16.png",
+    "32": "assets/icons/martlet-32.png",
+    "48": "assets/icons/martlet-48.png",
+    "128": "assets/icons/martlet-128.png"
   }
 }

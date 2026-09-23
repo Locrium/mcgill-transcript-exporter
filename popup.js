@@ -69,6 +69,7 @@
       const row = document.createElement("div");
       row.className = "result";
       const details = document.createElement("div");
+      details.className = "track-details";
       const title = document.createElement("strong");
       title.textContent = track.title;
       const meta = document.createElement("span");
