@@ -125,6 +125,15 @@ button:disabled { cursor: wait; opacity: .65; }
 
 .secondary:hover { border-color: #bfc3c9; background: var(--surface); }
 
+.batch-panel { margin-top: 16px; }
+.batch-panel > strong { display: block; font-size: 14px; }
+.batch-panel > p { margin: 3px 0 10px; }
+.recording-list { max-height: 216px; overflow-y: auto; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 10px; }
+.recording { display: flex; gap: 9px; align-items: flex-start; padding: 10px; border-bottom: 1px solid var(--line); font-size: 12px; line-height: 1.35; }
+.recording:last-child { border-bottom: 0; }
+.recording input { margin: 2px 0 0; accent-color: var(--red); }
+.batch-panel > button { width: 100%; }
+
 .empty {
   padding: 13px 14px;
   border: 1px solid var(--line);
@@ -162,4 +171,5 @@ button:disabled { cursor: wait; opacity: .65; }
   }
 
   .secondary:hover { border-color: #686c73; background: #292b2f; }
+  .recording-list, .recording { border-color: var(--line); }
 }

@@ -7,6 +7,8 @@
   const format = document.querySelector("#format");
   const timestamps = document.querySelector("#timestamps");
   const retry = document.querySelector("#retry");
+  const batch = document.querySelector("#batch");
+  const batchPanel = document.querySelector("#batchPanel");
   let tracks = [];
   let autoDownloaded = false;
 
@@ -102,6 +104,13 @@
       const payloads = frameResults.map((entry) => entry.result).filter(Boolean);
       const mediaCount = payloads.reduce((sum, payload) => sum + (payload.mediaCount || 0), 0);
       tracks = normalize(payloads.flatMap((payload) => payload.tracks || []));
+      const recordingResults = await chrome.scripting.executeScript({
+        target: { tabId: tab.id, allFrames: true },
+        func: () => globalThis.__brightspaceBatchList ? globalThis.__brightspaceBatchList() : []
+      });
+      const recordings = recordingResults.flatMap((entry) => entry.result || []);
+      batch.hidden = recordings.length < 2;
+      batch.dataset.recordings = JSON.stringify(recordings);
 
       if (!tracks.length) {
         status.textContent = mediaCount ? "No captions found" : "No video found";
@@ -127,7 +136,49 @@
     }
   }
 
+  function showBatch() {
+    const recordings = JSON.parse(batch.dataset.recordings || '[]');
+    batchPanel.replaceChildren(); batchPanel.hidden = false; batch.hidden = true; settings.hidden = true;
+    const heading = document.createElement('strong'); heading.textContent = 'Choose recordings';
+    const note = document.createElement('p'); note.textContent = 'Exports selected visible transcripts into one ZIP file.';
+    const list = document.createElement('div'); list.className = 'recording-list';
+    for (const recording of recordings) {
+      const label = document.createElement('label'); label.className = 'recording';
+      const input = document.createElement('input'); input.type = 'checkbox'; input.value = recording.id; input.checked = recording.active;
+      const text = document.createElement('span'); text.textContent = recording.title;
+      label.append(input, text); list.append(label);
+    }
+    const exportButton = document.createElement('button'); exportButton.type = 'button'; exportButton.textContent = 'Export selected ZIP';
+    exportButton.addEventListener('click', () => exportBatch(recordings, exportButton));
+    batchPanel.append(heading, note, list, exportButton);
+  }
+
+  async function exportBatch(recordings, button) {
+    const ids = [...batchPanel.querySelectorAll('input:checked')].map((input) => input.value);
+    if (!ids.length) { status.textContent = 'Choose at least one recording'; return; }
+    button.disabled = true; status.textContent = `Preparing ${ids.length} recording${ids.length === 1 ? '' : 's'}…`;
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      const results = await chrome.scripting.executeScript({ target: { tabId: tab.id, allFrames: true }, func: (selected) => globalThis.__brightspaceBatchCollect ? globalThis.__brightspaceBatchCollect(selected) : null, args: [ids] });
+      const payload = results.map((entry) => entry.result).find((entry) => entry && entry.recordings?.length);
+      if (!payload) throw new Error('Could not reach the Lecture Recordings frame. Refresh the page and try again.');
+      const extension = format.value;
+      const files = payload.recordings.filter((recording) => recording.cues?.length).map((recording) => ({
+        name: `${TranscriptTools.safeFilename(recording.title)}.${extension}`,
+        content: TranscriptTools.exportTranscript(recording, extension, timestamps.checked)
+      }));
+      if (!files.length) throw new Error(payload.recordings.find((recording) => recording.error)?.error || 'No readable transcripts were found.');
+      const url = URL.createObjectURL(new Blob([ZipTools.createZip(files)], { type: 'application/zip' }));
+      await chrome.downloads.download({ url, filename: 'mcgill-transcripts.zip', conflictAction: 'uniquify', saveAs: false });
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+      const failed = payload.recordings.length - files.length;
+      status.textContent = failed ? `Saved ${files.length}; ${failed} could not be read` : `Saved ${files.length} transcript${files.length === 1 ? '' : 's'}`;
+    } catch (error) { status.textContent = 'Batch export could not finish'; setEmpty(error.message || String(error)); }
+    finally { button.disabled = false; }
+  }
+
   retry.addEventListener("click", scan);
+  batch.addEventListener('click', showBatch);
   format.addEventListener("change", () => { timestamps.disabled = format.value === "vtt"; });
   scan();
 })();

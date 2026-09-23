@@ -123,6 +123,54 @@
     }));
   }
 
+  function recordingCards() {
+    return Array.from(document.querySelectorAll('.v-card')).map((card, index) => {
+      const image = card.querySelector('.v-image__image');
+      const background = image && image.style.backgroundImage || '';
+      const match = background.match(/\/content\/[^/]+\/[^/]+\/([^/]+)\/images/i);
+      const text = card.innerText.replace(/\s+/g, ' ').trim();
+      return { card, id: match && match[1], title: text.split('Instructor:')[0].trim() || `Recording ${index + 1}`, active: card.classList.contains('vcard_active') };
+    }).filter((item) => item.id);
+  }
+
+  async function waitForTranscript(previousId) {
+    const until = Date.now() + 20000;
+    while (Date.now() < until) {
+      const first = document.querySelector('[id^="caption-"]');
+      if (first && first.id !== previousId && readTranscriptPane().length) return true;
+      await wait(250);
+    }
+    return false;
+  }
+
+  // LRS supplies one rendered transcript at a time. Selecting a recording does
+  // not play it; this reads only the captions LRS renders for the signed-in user.
+  async function collectBatch(recordingIds) {
+    const cards = recordingCards();
+    if (!cards.length) return { recordings: [], error: 'No LRS recording list was found in this frame.' };
+    const requested = cards.filter((item) => recordingIds.includes(item.id));
+    const original = cards.find((item) => item.active);
+    const recordings = [];
+    let lastSelectedId = original && original.id;
+    for (const item of requested) {
+      const before = document.querySelector('[id^="caption-"]')?.id || '';
+      if (!item.active) {
+        item.card.click();
+        lastSelectedId = item.id;
+        if (!await waitForTranscript(before)) { recordings.push({ id: item.id, title: item.title, error: 'Transcript did not load in time.' }); continue; }
+      }
+      lastSelectedId = item.id;
+      const cues = readTranscriptPane();
+      recordings.push({ id: item.id, title: item.title, pageUrl: location.href, cues, error: cues.length ? '' : 'No readable captions.' });
+    }
+    if (original && lastSelectedId !== original.id) original.card.click();
+    return { recordings };
+  }
+
+  function listRecordings() {
+    return recordingCards().map(({ id, title, active }) => ({ id, title, active }));
+  }
+
   async function collect() {
     const mediaElements = deepElements("video, audio");
     const output = [];
@@ -185,4 +233,6 @@
   }
 
   globalThis.__brightspaceTranscriptCollect = collect;
+  globalThis.__brightspaceBatchList = listRecordings;
+  globalThis.__brightspaceBatchCollect = collectBatch;
 })();

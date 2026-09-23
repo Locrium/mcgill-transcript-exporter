@@ -12,6 +12,7 @@ A small Chrome/Edge Manifest V3 extension that exports captions already availabl
 - Chooses the playing or most visible media first.
 - Automatically downloads Markdown when exactly one transcript is found.
 - Lists each language/track when several are available.
+- On McGill Lecture Recordings pages, can package selected recordings' already-visible transcripts into one ZIP file.
 - Never asks for a Brightspace password or sends transcript data to a server.
 
 The extension exports existing captions. It does not transcribe audio and does not bypass course or media permissions.
@@ -38,6 +39,8 @@ After changing project files, click the extension's **Reload** button on the ext
 McGill's recording tool displays captions in a transcript sidebar hosted by `lrs.mcgill.ca`; it does not attach captions to the video as a browser text track. The extension has narrowly scoped access to `https://lrs.mcgill.ca/*` so it can read that already-visible transcript panel and export it. Reload the extension after updates, then refresh the recording page before testing.
 
 If the player is visible but nothing is found, turn captions on or open **Settings → View transcript** in the Brightspace player and click **Scan again**.
+
+For a course batch, open its Lecture Recordings page, click the extension, then choose **Batch export course recordings**. Select recordings and export one ZIP. The extension temporarily selects each recording's transcript pane without playing video, then restores your original selection. It does not bypass access controls; recordings without an available transcript are skipped and reported.
 
 ## Permissions and privacy
 
