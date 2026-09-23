@@ -10,7 +10,7 @@ A small Chrome/Edge Manifest V3 extension that exports captions already availabl
 - Finds native `<video>`/`<audio>` caption tracks, including media inside open shadow roots.
 - Reads browser `TextTrack` cues or fetches an attached VTT/SRT caption file with the page's existing session.
 - Chooses the playing or most visible media first.
-- Automatically downloads Markdown when exactly one transcript is found.
+- Lets you review and explicitly download every transcript; it never downloads on scan.
 - Lists each language/track when several are available.
 - On McGill Lecture Recordings pages, can package selected recordings' already-visible transcripts into one ZIP file.
 - Never asks for a Brightspace password or sends transcript data to a server.
@@ -40,7 +40,7 @@ McGill's recording tool displays captions in a transcript sidebar hosted by `lrs
 
 If the player is visible but nothing is found, turn captions on or open **Settings → View transcript** in the Brightspace player and click **Scan again**.
 
-Batch export is off by default. To use it, open a course's Lecture Recordings page, enable **Batch export** in the popup, then choose **Batch export course recordings**. Select recordings and explicitly press the ZIP export button. The extension temporarily selects each recording's transcript pane without playing video, then restores your original selection. It does not bypass access controls; recordings without an available transcript are skipped and reported.
+Batch export is available by default. Open a course's Lecture Recordings page, choose **Batch export course recordings**, select recordings, and explicitly press the ZIP export button. The extension temporarily selects each recording's transcript pane without playing video, then restores your original selection. It does not bypass access controls; recordings without an available transcript are skipped and reported. Single and batch export filenames use the LRS course code and recording date when LRS provides them.
 
 ## Permissions and privacy
 

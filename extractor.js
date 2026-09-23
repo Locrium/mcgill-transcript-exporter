@@ -127,9 +127,20 @@
     return Array.from(document.querySelectorAll('.v-card')).map((card, index) => {
       const image = card.querySelector('.v-image__image');
       const background = image && image.style.backgroundImage || '';
-      const match = background.match(/\/content\/[^/]+\/[^/]+\/([^/]+)\/images/i);
+      const match = background.match(/\/content\/([^/]+)\/([^/]+)\/([^/]+)\/images/i);
       const text = card.innerText.replace(/\s+/g, ' ').trim();
-      return { card, id: match && match[1], title: text.split('Instructor:')[0].trim() || `Recording ${index + 1}`, active: card.classList.contains('vcard_active') };
+      const recordingId = match && match[3];
+      const dateMatch = recordingId && recordingId.match(/(\d{4})(\d{2})(\d{2})/);
+      const date = dateMatch ? `${dateMatch[1]}-${dateMatch[2]}-${dateMatch[3]}` : '';
+      return {
+        card,
+        id: recordingId,
+        course: match && match[2],
+        date,
+        title: text.split('Instructor:')[0].trim() || `Recording ${index + 1}`,
+        exportTitle: [match && match[2], date].filter(Boolean).join(' - ') || `Recording ${index + 1}`,
+        active: card.classList.contains('vcard_active')
+      };
     }).filter((item) => item.id);
   }
 
@@ -161,14 +172,14 @@
       }
       lastSelectedId = item.id;
       const cues = readTranscriptPane();
-      recordings.push({ id: item.id, title: item.title, pageUrl: location.href, cues, error: cues.length ? '' : 'No readable captions.' });
+      recordings.push({ id: item.id, title: item.exportTitle, pageUrl: location.href, cues, error: cues.length ? '' : 'No readable captions.' });
     }
     if (original && lastSelectedId !== original.id) original.card.click();
     return { recordings };
   }
 
   function listRecordings() {
-    return recordingCards().map(({ id, title, active }) => ({ id, title, active }));
+    return recordingCards().map(({ id, title, exportTitle, active }) => ({ id, title, exportTitle, active }));
   }
 
   async function collect() {
@@ -201,8 +212,9 @@
     // This generic shape also covers similarly structured transcript sidebars.
     const paneCues = readTranscriptPane();
     if (paneCues.length) {
+      const current = recordingCards().find((item) => item.active);
       output.push({
-        title: document.title.replace(/\s+-\s+$/g, "").trim() || "Lecture recording",
+        title: current?.exportTitle || document.title.replace(/\s+-\s+$/g, "").trim() || "Lecture recording",
         pageUrl: location.href,
         mediaType: "video",
         playing: false,

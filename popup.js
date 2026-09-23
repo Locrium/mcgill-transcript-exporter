@@ -11,11 +11,10 @@
   const batchPanel = document.querySelector("#batchPanel");
   const batchEnabled = document.querySelector("#batchEnabled");
   let tracks = [];
-  let autoDownloaded = false;
   let availableRecordings = [];
 
   async function loadSettings() {
-    const saved = await chrome.storage.local.get({ batchEnabled: false });
+    const saved = await chrome.storage.local.get({ batchEnabled: true });
     batchEnabled.checked = saved.batchEnabled;
   }
 
@@ -127,14 +126,8 @@
         return;
       }
 
-      status.textContent = tracks.length === 1 ? "Transcript found" : `${tracks.length} caption tracks found`;
+      status.textContent = tracks.length === 1 ? "Transcript found — choose Download" : `${tracks.length} caption tracks found`;
       render();
-
-      if (tracks.length === 1 && !autoDownloaded) {
-        autoDownloaded = true;
-        const button = results.querySelector("button");
-        await download(tracks[0], button);
-      }
     } catch (error) {
       status.textContent = "Could not scan this page";
       setEmpty(error.message || String(error));
