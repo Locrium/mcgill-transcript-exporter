@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Brightspace Transcript Exporter",
+  "version": "0.1.1",
+  "description": "Export available video captions from Brightspace pages as Markdown, text, or WebVTT.",
+  "permissions": ["activeTab", "downloads", "scripting"],
+  "host_permissions": ["https://lrs.mcgill.ca/*"],
+  "action": {
+    "default_title": "Export video transcript",
+    "default_popup": "popup.html"
+  }
+}

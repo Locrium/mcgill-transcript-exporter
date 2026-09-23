@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transcript Exporter</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="mark" aria-hidden="true">T</div>
+        <div>
+          <h1>Transcript Exporter</h1>
+          <p id="status" role="status">Looking for captions…</p>
+        </div>
+      </header>
+
+      <section id="settings" class="settings" hidden>
+        <label for="format">Export format</label>
+        <select id="format">
+          <option value="md">Markdown (.md)</option>
+          <option value="txt">Plain text (.txt)</option>
+          <option value="vtt">WebVTT captions (.vtt)</option>
+        </select>
+        <label class="check">
+          <input id="timestamps" type="checkbox" />
+          Include timestamps
+        </label>
+      </section>
+
+      <section id="results" aria-live="polite"></section>
+      <button id="retry" class="secondary" type="button" hidden>Scan again</button>
+
+      <footer>
+        Only captions already available to your signed-in browser are read.
+      </footer>
+    </main>
+    <script src="lib/transcript.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
