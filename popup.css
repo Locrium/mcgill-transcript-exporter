@@ -92,6 +92,9 @@ select {
   font-weight: 500;
 }
 
+.batch-setting { padding-top: 3px; }
+.batch-setting span { display: block; margin: 3px 0 0 25px; color: var(--muted); font-size: 11px; line-height: 1.35; }
+
 .check input {
   width: 17px;
   height: 17px;

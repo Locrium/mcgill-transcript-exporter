@@ -40,7 +40,7 @@ McGill's recording tool displays captions in a transcript sidebar hosted by `lrs
 
 If the player is visible but nothing is found, turn captions on or open **Settings → View transcript** in the Brightspace player and click **Scan again**.
 
-For a course batch, open its Lecture Recordings page, click the extension, then choose **Batch export course recordings**. Select recordings and export one ZIP. The extension temporarily selects each recording's transcript pane without playing video, then restores your original selection. It does not bypass access controls; recordings without an available transcript are skipped and reported.
+Batch export is off by default. To use it, open a course's Lecture Recordings page, enable **Batch export** in the popup, then choose **Batch export course recordings**. Select recordings and explicitly press the ZIP export button. The extension temporarily selects each recording's transcript pane without playing video, then restores your original selection. It does not bypass access controls; recordings without an available transcript are skipped and reported.
 
 ## Permissions and privacy
 

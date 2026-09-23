@@ -9,8 +9,15 @@
   const retry = document.querySelector("#retry");
   const batch = document.querySelector("#batch");
   const batchPanel = document.querySelector("#batchPanel");
+  const batchEnabled = document.querySelector("#batchEnabled");
   let tracks = [];
   let autoDownloaded = false;
+  let availableRecordings = [];
+
+  async function loadSettings() {
+    const saved = await chrome.storage.local.get({ batchEnabled: false });
+    batchEnabled.checked = saved.batchEnabled;
+  }
 
   function setEmpty(message) {
     results.replaceChildren();
@@ -108,9 +115,8 @@
         target: { tabId: tab.id, allFrames: true },
         func: () => globalThis.__brightspaceBatchList ? globalThis.__brightspaceBatchList() : []
       });
-      const recordings = recordingResults.flatMap((entry) => entry.result || []);
-      batch.hidden = recordings.length < 2;
-      batch.dataset.recordings = JSON.stringify(recordings);
+      availableRecordings = recordingResults.flatMap((entry) => entry.result || []);
+      batch.hidden = !batchEnabled.checked || availableRecordings.length < 2;
 
       if (!tracks.length) {
         status.textContent = mediaCount ? "No captions found" : "No video found";
@@ -137,7 +143,7 @@
   }
 
   function showBatch() {
-    const recordings = JSON.parse(batch.dataset.recordings || '[]');
+    const recordings = availableRecordings;
     batchPanel.replaceChildren(); batchPanel.hidden = false; batch.hidden = true; settings.hidden = true;
     const heading = document.createElement('strong'); heading.textContent = 'Choose recordings';
     const note = document.createElement('p'); note.textContent = 'Exports selected visible transcripts into one ZIP file.';
@@ -179,6 +185,11 @@
 
   retry.addEventListener("click", scan);
   batch.addEventListener('click', showBatch);
+  batchEnabled.addEventListener('change', async () => {
+    await chrome.storage.local.set({ batchEnabled: batchEnabled.checked });
+    batch.hidden = !batchEnabled.checked || availableRecordings.length < 2;
+    if (!batchEnabled.checked) batchPanel.hidden = true;
+  });
   format.addEventListener("change", () => { timestamps.disabled = format.value === "vtt"; });
-  scan();
+  loadSettings().then(scan);
 })();
