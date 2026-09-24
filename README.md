@@ -1,4 +1,8 @@
-# McGill Transcript Exporter
+# McGill Video Transcript Exporter
+
+<p align="center">
+  <img src="assets/mcgill-transcript-logo.png" width="180" alt="Red martlet speaking over a white transcript document" />
+</p>
 
 A small Chrome/Edge Manifest V3 extension that exports captions already available to the signed-in student as Markdown, plain text, or WebVTT. It supports native Brightspace media and McGill Lecture Recording System transcript panels.
 
@@ -23,7 +27,7 @@ The extension exports existing captions. It does not transcribe audio and does n
 2. Turn on **Developer mode**.
 3. Choose **Load unpacked**.
 4. Select this project folder.
-5. Pin **McGill Transcript Exporter** to the toolbar.
+5. Pin **McGill Video Transcript Exporter** to the toolbar.
 
 After changing project files, click the extension's **Reload** button on the extensions page and refresh the course page.
 
@@ -31,8 +35,7 @@ After changing project files, click the extension's **Reload** button on the ext
 
 1. Open a Brightspace lesson containing a video and wait for the player to load.
 2. Click the extension icon.
-3. If one caption track is available, a Markdown transcript downloads immediately.
-4. If several tracks are available, select the format and click the desired track's **Download** button.
+3. Select the export format and click the desired track's **Download** button.
 
 ### McGill Lecture Recordings
 

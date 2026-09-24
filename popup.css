@@ -31,15 +31,15 @@ header {
 
 .mark {
   display: grid;
-  width: 45px;
-  height: 38px;
+  width: 48px;
+  height: 48px;
   place-items: center;
 }
 
 .mark img {
   display: block;
-  width: 45px;
-  height: 38px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
 }
 
