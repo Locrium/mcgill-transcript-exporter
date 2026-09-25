@@ -164,11 +164,14 @@
       const extension = format.value;
       const files = payload.recordings.filter((recording) => recording.cues?.length).map((recording) => ({
         name: `${TranscriptTools.safeFilename(recording.title)}.${extension}`,
+        course: recording.course,
         content: TranscriptTools.exportTranscript(recording, extension, timestamps.checked)
       }));
       if (!files.length) throw new Error(payload.recordings.find((recording) => recording.error)?.error || 'No readable transcripts were found.');
       const url = URL.createObjectURL(new Blob([ZipTools.createZip(files)], { type: 'application/zip' }));
-      await chrome.downloads.download({ url, filename: 'mcgill-transcripts.zip', conflictAction: 'uniquify', saveAs: false });
+      const course = files.find((file) => file.course)?.course;
+      const zipName = course ? `${TranscriptTools.safeFilename(course)} - transcripts.zip` : 'mcgill-transcripts.zip';
+      await chrome.downloads.download({ url, filename: zipName, conflictAction: 'uniquify', saveAs: false });
       setTimeout(() => URL.revokeObjectURL(url), 30000);
       const failed = payload.recordings.length - files.length;
       status.textContent = failed ? `Saved ${files.length}; ${failed} could not be read` : `Saved ${files.length} transcript${files.length === 1 ? '' : 's'}`;

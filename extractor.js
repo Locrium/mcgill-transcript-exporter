@@ -144,6 +144,21 @@
     }).filter((item) => item.id);
   }
 
+  function currentRecording(cards = recordingCards()) {
+    const marked = cards.find((item) => item.active);
+    if (marked) return marked;
+
+    // Some LRS views do not add an active class to the selected card. The
+    // player's loaded URL still carries the recording id, so use it when it is
+    // available. A one-recording page is unambiguous as a final fallback.
+    const playerUrls = Array.from(document.querySelectorAll('video, video source, .video-js, [class*="player"]'))
+      .flatMap((element) => [element.currentSrc, element.src, element.poster, element.getAttribute('data-setup')])
+      .filter(Boolean)
+      .join(' ');
+    const fromPlayer = cards.find((item) => playerUrls.includes(item.id));
+    return fromPlayer || (cards.length === 1 ? cards[0] : undefined);
+  }
+
   async function waitForTranscript(previousId) {
     const until = Date.now() + 20000;
     while (Date.now() < until) {
@@ -160,7 +175,7 @@
     const cards = recordingCards();
     if (!cards.length) return { recordings: [], error: 'No LRS recording list was found in this frame.' };
     const requested = cards.filter((item) => recordingIds.includes(item.id));
-    const original = cards.find((item) => item.active);
+    const original = currentRecording(cards);
     const recordings = [];
     let lastSelectedId = original && original.id;
     for (const item of requested) {
@@ -172,7 +187,7 @@
       }
       lastSelectedId = item.id;
       const cues = readTranscriptPane();
-      recordings.push({ id: item.id, title: item.exportTitle, pageUrl: location.href, cues, error: cues.length ? '' : 'No readable captions.' });
+      recordings.push({ id: item.id, course: item.course, date: item.date, title: item.exportTitle, pageUrl: location.href, cues, error: cues.length ? '' : 'No readable captions.' });
     }
     if (original && lastSelectedId !== original.id) original.card.click();
     return { recordings };
@@ -212,7 +227,7 @@
     // This generic shape also covers similarly structured transcript sidebars.
     const paneCues = readTranscriptPane();
     if (paneCues.length) {
-      const current = recordingCards().find((item) => item.active);
+      const current = currentRecording();
       output.push({
         title: current?.exportTitle || document.title.replace(/\s+-\s+$/g, "").trim() || "Lecture recording",
         pageUrl: location.href,
