@@ -159,44 +159,6 @@
     return fromPlayer || (cards.length === 1 ? cards[0] : undefined);
   }
 
-  async function waitForTranscript(previousId) {
-    const until = Date.now() + 20000;
-    while (Date.now() < until) {
-      const first = document.querySelector('[id^="caption-"]');
-      if (first && first.id !== previousId && readTranscriptPane().length) return true;
-      await wait(250);
-    }
-    return false;
-  }
-
-  // LRS supplies one rendered transcript at a time. Selecting a recording does
-  // not play it; this reads only the captions LRS renders for the signed-in user.
-  async function collectBatch(recordingIds) {
-    const cards = recordingCards();
-    if (!cards.length) return { recordings: [], error: 'No LRS recording list was found in this frame.' };
-    const requested = cards.filter((item) => recordingIds.includes(item.id));
-    const original = currentRecording(cards);
-    const recordings = [];
-    let lastSelectedId = original && original.id;
-    for (const item of requested) {
-      const before = document.querySelector('[id^="caption-"]')?.id || '';
-      if (!item.active) {
-        item.card.click();
-        lastSelectedId = item.id;
-        if (!await waitForTranscript(before)) { recordings.push({ id: item.id, title: item.title, error: 'Transcript did not load in time.' }); continue; }
-      }
-      lastSelectedId = item.id;
-      const cues = readTranscriptPane();
-      recordings.push({ id: item.id, course: item.course, date: item.date, title: item.exportTitle, pageUrl: location.href, cues, error: cues.length ? '' : 'No readable captions.' });
-    }
-    if (original && lastSelectedId !== original.id) original.card.click();
-    return { recordings };
-  }
-
-  function listRecordings() {
-    return recordingCards().map(({ id, title, exportTitle, active }) => ({ id, title, exportTitle, active }));
-  }
-
   async function collect() {
     const mediaElements = deepElements("video, audio");
     const output = [];
@@ -260,6 +222,4 @@
   }
 
   globalThis.__brightspaceTranscriptCollect = collect;
-  globalThis.__brightspaceBatchList = listRecordings;
-  globalThis.__brightspaceBatchCollect = collectBatch;
 })();

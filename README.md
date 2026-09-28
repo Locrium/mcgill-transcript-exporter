@@ -16,7 +16,7 @@ A small Chrome/Edge Manifest V3 extension that exports captions already availabl
 - Chooses the playing or most visible media first.
 - Lets you review and explicitly download every transcript; it never downloads on scan.
 - Lists each language/track when several are available.
-- On McGill Lecture Recordings pages, can package selected recordings' already-visible transcripts into one ZIP file.
+- On McGill Lecture Recordings pages, can package selected recordings' existing VTT caption files into one ZIP file without driving the LRS player UI.
 - Never asks for a Brightspace password or sends transcript data to a server.
 
 The extension exports existing captions. It does not transcribe audio and does not bypass course or media permissions.
@@ -43,7 +43,7 @@ McGill's recording tool displays captions in a transcript sidebar hosted by `lrs
 
 If the player is visible but nothing is found, turn captions on or open **Settings → View transcript** in the Brightspace player and click **Scan again**.
 
-Batch export is available by default. Open a course's Lecture Recordings page, choose **Batch export course recordings**, select recordings, and explicitly press the ZIP export button. The extension temporarily selects each recording's transcript pane without playing video, then restores your original selection. It does not bypass access controls; recordings without an available transcript are skipped and reported. Single and batch export filenames use the LRS course code and recording date when LRS provides them.
+Batch export is available by default. After reloading the Lecture Recordings page, choose **Batch export course recordings**, select recordings, and explicitly press the ZIP export button. The extension observes the temporary LRS authorization header already sent by your signed-in browser, keeps it only in memory, and asks McGill's LRS API for the existing recording list and VTT caption files. It does not click recordings, play videos, persist the token, or send it to any third party. Recordings without an available transcript are skipped and reported. Single and batch export filenames use the LRS course code and recording date when LRS provides them.
 
 ## Permissions and privacy
 
@@ -55,11 +55,13 @@ The extension is designed to process content locally in the browser.
 | `scripting` | Lets it inspect the page's media, caption tracks, and transcript DOM. |
 | `downloads` | Saves the selected Markdown, TXT, or VTT file to the user's Downloads folder. |
 | `https://lrs.mcgill.ca/*` | Lets the McGill adapter inspect the embedded Lecture Recording System frame where its transcript sidebar is rendered. |
+| `webRequest` + `https://lrswapi.campus.mcgill.ca/*` | Observes the signed-in browser's existing temporary LRS authorization header so batch export can request the same course's recording metadata and VTT captions directly from McGill. The token stays only in service-worker memory. |
 
 The extension does **not**:
 
 - send transcript text, URLs, credentials, cookies, or analytics to a server;
 - ask for or store a Brightspace password;
+- persist LRS authorization tokens;
 - read arbitrary browsing history;
 - bypass course access, authentication, DRM, or download restrictions;
 - generate a transcript for a video that has no captions.

@@ -45,6 +45,28 @@
       });
   }
 
+  function lrsDate(value) {
+    const match = String(value || "").match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return match ? `${match[1]}-${match[2]}-${match[3]}` : "";
+  }
+
+  function normalizeLrsRecordings(records) {
+    return (Array.isArray(records) ? records : []).map((recording, index) => {
+      const id = recording.id ?? recording.recordingId ?? recording.recordingID;
+      const course = recording.courseName || recording.courseCode || "McGill course";
+      const date = lrsDate(recording.dateTime || recording.recordingDate || recording.createdDateTime);
+      const instructor = recording.instructor || "Lecture recording";
+      return {
+        ...recording,
+        id: String(id || index),
+        course,
+        date,
+        title: [course, date, instructor].filter(Boolean).join(" · "),
+        active: false
+      };
+    }).filter((recording) => recording.id !== String(undefined));
+  }
+
   async function download(track, button) {
     button.disabled = true;
     try {
@@ -110,12 +132,10 @@
       const payloads = frameResults.map((entry) => entry.result).filter(Boolean);
       const mediaCount = payloads.reduce((sum, payload) => sum + (payload.mediaCount || 0), 0);
       tracks = normalize(payloads.flatMap((payload) => payload.tracks || []));
-      const recordingResults = await chrome.scripting.executeScript({
-        target: { tabId: tab.id, allFrames: true },
-        func: () => globalThis.__brightspaceBatchList ? globalThis.__brightspaceBatchList() : []
-      });
-      availableRecordings = recordingResults.flatMap((entry) => entry.result || []);
+      const directBatch = await chrome.runtime.sendMessage({ type: "LRS_LIST_RECORDINGS", tabId: tab.id });
+      availableRecordings = directBatch?.ok ? normalizeLrsRecordings(directBatch.recordings) : [];
       batch.hidden = !batchEnabled.checked || availableRecordings.length < 2;
+      batch.title = directBatch?.ok ? "" : (directBatch?.error || "Reload the Lecture Recordings page to enable direct batch export.");
 
       if (!tracks.length) {
         status.textContent = mediaCount ? "No captions found" : "No video found";
@@ -139,7 +159,7 @@
     const recordings = availableRecordings;
     batchPanel.replaceChildren(); batchPanel.hidden = false; batch.hidden = true; settings.hidden = true;
     const heading = document.createElement('strong'); heading.textContent = 'Choose recordings';
-    const note = document.createElement('p'); note.textContent = 'Exports selected visible transcripts into one ZIP file.';
+    const note = document.createElement('p'); note.textContent = 'Fetches selected caption files directly from LRS; it does not switch the recording player.';
     const list = document.createElement('div'); list.className = 'recording-list';
     for (const recording of recordings) {
       const label = document.createElement('label'); label.className = 'recording';
@@ -158,14 +178,15 @@
     button.disabled = true; status.textContent = `Preparing ${ids.length} recording${ids.length === 1 ? '' : 's'}…`;
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      const results = await chrome.scripting.executeScript({ target: { tabId: tab.id, allFrames: true }, func: (selected) => globalThis.__brightspaceBatchCollect ? globalThis.__brightspaceBatchCollect(selected) : null, args: [ids] });
-      const payload = results.map((entry) => entry.result).find((entry) => entry && entry.recordings?.length);
-      if (!payload) throw new Error('Could not reach the Lecture Recordings frame. Refresh the page and try again.');
+      if (!tab?.id) throw new Error('Open the Lecture Recordings page and try again.');
+      const selected = recordings.filter((recording) => ids.includes(recording.id));
+      const payload = await chrome.runtime.sendMessage({ type: 'LRS_FETCH_TRANSCRIPTS', tabId: tab.id, recordings: selected });
+      if (!payload?.ok) throw new Error(payload?.error || 'Could not fetch the selected LRS transcripts.');
       const extension = format.value;
-      const files = payload.recordings.filter((recording) => recording.cues?.length).map((recording) => ({
+      const files = payload.recordings.filter((recording) => recording.raw).map((recording) => ({
         name: `${TranscriptTools.safeFilename(recording.title)}.${extension}`,
         course: recording.course,
-        content: TranscriptTools.exportTranscript(recording, extension, timestamps.checked)
+        content: TranscriptTools.exportTranscript({ ...recording, cues: TranscriptTools.parseTimedText(recording.raw) }, extension, timestamps.checked)
       }));
       if (!files.length) throw new Error(payload.recordings.find((recording) => recording.error)?.error || 'No readable transcripts were found.');
       const url = URL.createObjectURL(new Blob([ZipTools.createZip(files)], { type: 'application/zip' }));
