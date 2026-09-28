@@ -21,6 +21,18 @@ A small Chrome/Edge Manifest V3 extension that exports captions already availabl
 
 The extension exports existing captions. It does not transcribe audio and does not bypass course or media permissions.
 
+## Demo screenshot
+
+### Empty state
+
+<img src="assets/popup-empty-state.png" width="360" alt="Extension popup showing its no-video-found state" />
+
+### Batch export
+
+<img src="assets/demo-batch-export.png" alt="Fictional course-page mock showing the extension's batch export interface" />
+
+The batch screenshot comes from [`demo/index.html`](demo/index.html), a standalone, screenshot-ready interface mock. It uses fictional course names, recordings, instructor names, video imagery, and transcript text; it does not connect to Brightspace, McGill LRS, or any account.
+
 ## Install locally
 
 1. Open `chrome://extensions` in Chrome, or `edge://extensions` in Edge.

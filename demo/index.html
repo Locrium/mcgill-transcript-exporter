@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>McGill Video Transcript Exporter — demo</title>
+    <link rel="stylesheet" href="demo.css" />
+  </head>
+  <body>
+    <div class="demo-notice">DEMO DATA — fictional course, recordings, and transcript text</div>
+    <main class="browser" aria-label="Illustrative course-page mock">
+      <section class="course-page">
+        <nav class="topbar">
+          <strong>Course Portal</strong>
+          <span>Courses</span><span>Calendar</span><span>Messages</span>
+        </nav>
+        <header class="course-heading">
+          <p>WINTER 2026 / CSCI-000</p>
+          <h1>Foundations of Computing</h1>
+          <span>Lecture recordings</span>
+        </header>
+        <div class="course-layout">
+          <aside>
+            <h2>Recordings</h2>
+            <button class="lecture active"><b>Lecture 05</b><span>Jan 26 · 01:12:04</span></button>
+            <button class="lecture"><b>Lecture 04</b><span>Jan 19 · 01:08:30</span></button>
+            <button class="lecture"><b>Lecture 03</b><span>Jan 12 · 00:58:44</span></button>
+            <button class="lecture"><b>Lecture 02</b><span>Jan 05 · 01:04:21</span></button>
+          </aside>
+          <section class="player">
+            <div class="video"><span>DEMO LECTURE</span><div class="play">▶</div><p>Memory, scheduling, and a very patient rubber duck.</p></div>
+            <h2>Lecture 05: Scheduling</h2>
+            <p class="muted">A fictional recording used only to demonstrate the extension interface.</p>
+          </section>
+          <section class="transcript"><h2>Transcript</h2><p><time>00:00:12</time> Today we compare two ways to schedule work.</p><p><time>00:00:26</time> The useful question is what information each strategy needs.</p><p><time>00:00:39</time> Let us try the small example before writing the rule.</p></section>
+        </div>
+      </section>
+
+      <section class="popup" aria-label="McGill Video Transcript Exporter mock popup">
+        <header>
+          <img src="../assets/mcgill-transcript-logo.png" alt="" />
+          <div><h2>McGill Video Transcript Exporter</h2><p>Transcript found — demo data</p></div>
+        </header>
+        <div class="result"><div><strong>CSCI-000 · 2026-01-26</strong><span>Transcript · 01:12:04 · transcript panel</span></div><button>Download</button></div>
+        <div class="settings"><label>Export format <select><option>Markdown (.md)</option></select></label><label><input type="checkbox" /> Include timestamps</label><label><input type="checkbox" checked /> Enable batch export</label><small>Select recordings manually before exporting a ZIP.</small></div>
+        <section class="batch"><strong>Choose recordings</strong><p>Demo list. The real extension fetches only recordings available to the signed-in course.</p><div class="recordings"><label><input type="checkbox" checked /> CSCI-000 · 2026-01-26 · A. Example</label><label><input type="checkbox" checked /> CSCI-000 · 2026-01-19 · A. Example</label><label><input type="checkbox" /> CSCI-000 · 2026-01-12 · A. Example</label><label><input type="checkbox" /> CSCI-000 · 2026-01-05 · A. Example</label></div><button class="export">Export selected ZIP</button></section>
+      </section>
+    </main>
+  </body>
+</html>
